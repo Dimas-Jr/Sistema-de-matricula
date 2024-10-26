@@ -1,0 +1,92 @@
+-- Tabla de usuarios con roles
+CREATE TABLE usuarios (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_usuario VARCHAR(50) UNIQUE NOT NULL,
+    contrasena VARCHAR(255) NOT NULL,
+    correo VARCHAR(100) UNIQUE NOT NULL,
+    rol ENUM('Administrador', 'Alumno') NOT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de administradores
+CREATE TABLE administradores (
+    id_admin INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+);
+
+-- Tabla de estudiantes
+CREATE TABLE estudiantes (
+    id_estudiante INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    codigo_universitario VARCHAR(20) UNIQUE NOT NULL,
+    telefono VARCHAR(15),
+    direccion VARCHAR(255),
+    fecha_nacimiento DATE,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN DEFAULT TRUE,
+    id_carrera INT NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
+    FOREIGN KEY (id_carrera) REFERENCES carreras(id_carrera)
+);
+
+-- Tabla de docentes
+CREATE TABLE docentes (
+    id_docente INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_usuario VARCHAR(50) UNIQUE NOT NULL,
+    correo VARCHAR(100) UNIQUE NOT NULL,
+    telefono VARCHAR(15),
+    direccion VARCHAR(255),
+    fecha_nacimiento DATE,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN DEFAULT TRUE,
+    especialidad VARCHAR(100)
+);
+
+-- Tabla de carreras
+CREATE TABLE carreras (
+    id_carrera INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_carrera VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    duracion INT NOT NULL, -- en semestres o ciclos
+    facultad VARCHAR(100) NOT NULL DEFAULT 'Facultad de Ingeniería Industrial y de Sistemas'
+);
+
+-- Tabla de cursos
+CREATE TABLE cursos (
+    id_curso INT AUTO_INCREMENT PRIMARY KEY,
+    codigo_curso VARCHAR(10) UNIQUE NOT NULL,
+    nombre_curso VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    creditos INT NOT NULL,
+    ciclo INT NOT NULL, -- ciclo/semestre en el que se ofrece
+    id_carrera INT NOT NULL,
+    id_docente INT NOT NULL,
+    cupos INT NOT NULL,
+    FOREIGN KEY (id_carrera) REFERENCES carreras(id_carrera),
+    FOREIGN KEY (id_docente) REFERENCES docentes(id_docente)
+);
+
+-- Tabla de matrículas
+CREATE TABLE matriculas (
+    id_matricula INT AUTO_INCREMENT PRIMARY KEY,
+    id_estudiante INT NOT NULL,
+    id_curso INT NOT NULL,
+    fecha_matricula TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado_matricula ENUM('Activa', 'Retirada', 'Finalizada') DEFAULT 'Activa',
+    FOREIGN KEY (id_estudiante) REFERENCES estudiantes(id_estudiante),
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+);
+
+-- Tabla de horarios
+CREATE TABLE horarios (
+    id_horario INT AUTO_INCREMENT PRIMARY KEY,
+    id_curso INT NOT NULL,
+    id_docente INT NOT NULL,
+    dia_semana ENUM('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado') NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso),
+    FOREIGN KEY (id_docente) REFERENCES docentes(id_docente)
+);
